@@ -598,10 +598,22 @@ async def process_query(update: Update, context: ContextTypes.DEFAULT_TYPE, text
     elif has_file and not user_text:
         # Файл без текста — это почти всегда бриф для расчёта
         logger.info("File without user text — forcing PRICING intent")
-        intent = "PRICING"
-        logger.info(f"Routing to handler: PRICING (forced for file)")
         await handle_pricing(update, context, text)
         return
+    # Файл + явное указание на расчёт → всегда PRICING (не отдаём LLM)
+    PRICING_KEYWORDS = [
+        "посчитай", "посчитать", "расчёт", "расчет", "рассчитай", "рассчитать",
+        " кп", "кп ", "=кп", "кп=", "\nкп", "кп\n",
+        "коммерческое предложение", "стоимость", "цена", "бюджет",
+        "сколько стоит", "сколько будет", "оцени", "оценить", "смета",
+        "прайс", "прайсинг", "pricing"
+    ]
+    if has_file and user_text:
+        user_lower = user_text.lower()
+        if any(kw in user_lower for kw in PRICING_KEYWORDS):
+            logger.info(f"File + pricing keyword in '{user_text[:60]}' — forcing PRICING")
+            await handle_pricing(update, context, text)
+            return
     intent = classify_intent(classify_text, history)
     logger.info(f"Routing to handler: {intent}")
     if intent == "ANALYTICAL":
