@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.env
+*.txt.bak
+nohup.out
+check_*.py
+enrich_*.py
+infer_*.py
+fix_*.py
+get_*.py
+inaccessible_kp_list.md
+.env.local
+remove_secrets.py
+bot_run.log
